@@ -69,6 +69,7 @@ import Network.Mux.Timeout
 import Network.Mux.Trace
 import Network.Mux.Types
 
+import Debug.Trace (traceM)
 
 data Mux (mode :: MuxMode) m =
      Mux {
@@ -570,7 +571,7 @@ muxChannel tracer egressQueue want@(Wanton w) mc md q =
                    when wasEmpty $
                      writeTBQueue egressQueue (TLSRDemand mc md want)
                else retry
-
+        traceM $ "send: " <> show (BL.unpack encoding)
         traceWith tracer $ MuxTraceChannelSendEnd mc
 
     recv :: m (Maybe BL.ByteString)
@@ -584,6 +585,7 @@ muxChannel tracer egressQueue want@(Wanton w) mc md q =
                 then retry
                 else writeTVar q BL.empty >> return blob
         -- say $ printf "recv mid %s mode %s blob len %d" (show mid) (show md) (BL.length blob)
+        traceM $ "recv: " <> show (BL.unpack blob)
         traceWith tracer $ MuxTraceChannelRecvEnd mc (fromIntegral $ BL.length blob)
         return $ Just blob
 
